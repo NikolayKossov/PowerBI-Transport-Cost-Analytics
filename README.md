@@ -4,125 +4,144 @@
 
 ![Power BI](https://img.shields.io/badge/Power_BI-F2C811?style=for-the-badge) ![Power Query](https://img.shields.io/badge/Power_Query-16B8A6?style=for-the-badge) ![DAX](https://img.shields.io/badge/DAX-5B6ACB?style=for-the-badge) ![SQL](https://img.shields.io/badge/SQL-284B63?style=for-the-badge) ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge)
 
-**Które kierunki generują przekroczenia kosztów i gdzie warto zbadać konsolidację dostaw?**
+**Which routes exceed their cost targets, and where should shipment consolidation be investigated?**
 
-[Raport](model/Analytics.pbip) · [Model danych](docs/model.md) · [Miary DAX](dax/measures.dax) · [Wnioski](docs/management-brief.md)
+[Power BI project](model/Analytics.pbip) · [Data model](docs/model.md) · [DAX measures](dax/measures.dax) · [Management brief](docs/management-brief.md)
 
 </div>
 
-## 📚 Spis treści
+# Transport Cost Analytics
 
-- [Cel biznesowy](#-cel-biznesowy)
-- [Podgląd i wyniki](#-podgląd-i-wyniki)
-- [Zakres analizy](#-zakres-analizy)
-- [Technologie i przepływ danych](#-technologie-i-przepływ-danych)
-- [Uruchomienie](#-uruchomienie)
-- [Jakość danych i automatyzacja](#-jakość-danych-i-automatyzacja)
-- [Struktura projektu](#-struktura-projektu)
-- [Założenia i ograniczenia](#-założenia-i-ograniczenia)
+## 📚 Table of contents
 
-## 🎯 Cel biznesowy
+- [Business objective](#-business-objective)
+- [Preview and findings](#-preview-and-findings)
+- [Report scope](#-report-scope)
+- [Technologies and data flow](#-technologies-and-data-flow)
+- [Getting started](#-getting-started)
+- [Data quality and automation](#-data-quality-and-automation)
+- [Project structure](#-project-structure)
+- [Methodology and limitations](#-methodology-and-limitations)
 
-Koszty transportu i wykorzystanie floty. Projekt portfolio pokazuje proces od eksportów operacyjnych przez model gwiazdy i wskaźniki po krótką rekomendację dla właściciela firmy. Obejmuje 7,200 rekordów faktów z 24 miesięcy.
+## 🎯 Business objective
 
-> **Projekt demonstracyjny.** Wszystkie dane są syntetyczne. Nie jest to wdrożenie dla BPO NETWORK ani integracja z rzeczywistą bazą Comarch ERP Optima.
+Transport costs and fleet utilization. This portfolio project demonstrates the complete analytical workflow: operational exports, a star schema, business measures and a concise recommendation for company owners. It contains **7,200 fact records across 24 months**, from January 2024 to December 2025.
 
-## 📊 Podgląd i wyniki
+> **Demonstration project.** All data is synthetic. This is not a deployment for BPO NETWORK or an integration with a live Comarch ERP Optima database.
 
-![Statyczny podgląd danych projektu](assets/dashboard-preview.svg)
+## 📊 Preview and findings
 
-*Ilustracja obliczona z danych repozytorium, nie zrzut z Power BI Desktop. Interaktywny raport jest zdefiniowany w plikach PBIP/PBIR.*
+![Static preview calculated from the project data](assets/dashboard-preview.svg)
 
-| Wskaźnik — cały okres, bez filtrów | Wynik kontrolny |
+*This illustration is calculated from the repository’s data. It is not a screenshot from Power BI Desktop. The interactive report is defined in the PBIP/PBIR source files.*
+
+| Metric — full period, no filters | Reference result |
 |---|---:|
-| Koszt transportu | 20.64 mln zł |
-| Odchylenie budżetu | 3.2% |
-| Wykorzystanie | 63.7% |
-| Wysyłki | 7,200 |
+| Transport cost | PLN 20.64m |
+| Budget variance | 3.2% |
+| Capacity utilization | 63.7% |
+| Shipments | 7,200 |
 
-Kierunek Łódź → Lyon w 2025 r. przekracza budżet o **638,508.66 PLN**. To sygnał do analizy taryf, dopłat i warunków umowy, nie dowód nieefektywności przewoźnika.
+The Łódź–Lyon route exceeds its 2025 transport budget by **PLN 638,508.66**. This is a reason to investigate tariffs, surcharges and contract terms; it does not establish carrier inefficiency.
 
-**Rekomendacja:** Porównać oferty dla Lyonu; pilotażowo połączyć wysyłki tylko przy zgodnych oknach dostaw. Sprawdzić terminowość przed i po pilotażu. Scenariusz 75–95% pokazuje wyłącznie teoretyczny pułap oszczędności.
+**Recommendation:** Compare carrier offers for Lyon and pilot consolidation only where delivery windows are compatible. Monitor on-time performance before and after the pilot. The 75–95% utilization scenario is a theoretical savings ceiling, not a committed saving.
 
-## 🔎 Zakres analizy
+## 🔎 Report scope
 
-| Strona raportu | Sposób pracy |
+| Report page | Purpose |
 |---|---|
-| 01 | Przegląd kosztów | Cztery KPI, trend, struktura i tabela szczegółów |
-| 02 | Kierunki i klienci | Porównanie przekrojów i identyfikacja odchyleń |
-| 03 | Wykorzystanie i scenariusz | Wskaźniki operacyjne, szczegóły i wsparcie decyzji |
+| 01 — Cost overview | Four KPIs, a trend chart, a breakdown and a detailed table |
+| 02 — Routes and customers | Compare business dimensions and investigate variances |
+| 03 — Utilization and scenario analysis | Explore operational drivers and support business decisions |
 
-Każda strona ma filtr miesiąca i wymiaru biznesowego. Wybór elementu wykresu filtruje pozostałe wizualizacje. Miary obejmują m/m, r/r i YTD; dodatkowe miary można umieszczać na wizualizacjach z panelu modelu.
+Each page includes a month slicer and a business-dimension slicer. Selecting a chart item filters other visuals. The transport scenario page uses a target-utilization slicer instead of the business-dimension slicer.
 
-## 🧰 Technologie i przepływ danych
+The model includes month-over-month, year-over-year and year-to-date measures. Additional measures can be added to visuals from the model pane. Select a single month when interpreting month-over-month KPI cards.
+
+The README and its illustrations are in English. Native report labels, DAX measure names and supporting business documents remain in Polish to reflect the target role; page names above are English descriptions.
+
+## 🧰 Technologies and data flow
 
 ```mermaid
 flowchart LR
-    A["Eksporty ERP / MES / TMS — demo"] --> B["Power Query: typy, łączenia, kontrole"]
-    B --> C["Model gwiazdy"]
-    C --> D["DAX: KPI i odchylenia"]
-    D --> E["3 strony raportu Power BI"]
-    A --> F["Python + SQLite: niezależne uzgodnienie"]
+    A["Synthetic ERP / MES / TMS exports"] --> B["Power Query: types, joins, checks"]
+    B --> C["Star schema"]
+    C --> D["DAX: KPIs and variances"]
+    D --> E["Three Power BI report pages"]
+    A --> F["Python + SQLite: independent reconciliation"]
 ```
 
-| Kompetencja z roli analityka | Dowód w projekcie |
+| Relevant analytical skill | Evidence in this repository |
 |---|---|
-| Łączenie wielu źródeł | [Zapytania M](power-query) i kontrola kardynalności połączeń |
-| Power BI i modelowanie | [Model semantyczny](model/Analytics.SemanticModel/model.bim), relacje 1:N |
-| DAX i analiza okresów | [Katalog miar](dax/measures.dax), DIVIDE, CALCULATE, DATEADD, YTD |
-| SQL | [Zapytanie analityczne](sql/analysis.sql), wykonywane w SQLite |
-| Automatyzacja i jakość | [Kontrole](scripts/validate.py), workflow GitHub Actions |
-| Komunikacja z biznesem | [Notatka zarządcza](docs/management-brief.md), jawne ograniczenia |
-| Excel | [Dodatkowe ćwiczenie](docs/excel-workflow.md); bez gotowego skoroszytu |
+| Combining multiple sources | [Power Query scripts](power-query) with join-cardinality checks |
+| Power BI and data modeling | [Semantic model](model/Analytics.SemanticModel/model.bim), one-to-many relationships |
+| DAX and period analysis | [Measure catalog](dax/measures.dax), DIVIDE, CALCULATE, DATEADD and YTD |
+| SQL | [Ad hoc analytical query](sql/analysis.sql), executed in SQLite |
+| Automation and data quality | [Validation script](scripts/validate.py) and GitHub Actions workflow |
+| Business communication | [Management brief](docs/management-brief.md), actionable recommendations and explicit limitations |
+| Excel | [Optional exercise](docs/excel-workflow.md); no completed workbook is included |
 
-## 🚀 Uruchomienie
+## 🚀 Getting started
 
-1. Sklonuj repozytorium na Windows z aktualnym **Power BI Desktop** obsługującym PBIP i PBIR. W razie potrzeby włącz Power BI Project w opcjach funkcji zapoznawczych. Format modelu: TMSL `model.bim`.
-2. Ustaw lokalną ścieżkę danych przed otwarciem raportu:
+1. Clone this repository on Windows with a current version of **Power BI Desktop** supporting PBIP and PBIR. Enable the Power BI Project preview option if required by your version. The semantic model uses TMSL in `model.bim`.
+2. Before opening the report, configure the local data path:
 
    ```powershell
    python scripts/configure.py
    ```
 
-   Skrypt ustawia parametr `DataRoot` na bezwzględną ścieżkę folderu `data` w tej kopii. Alternatywnie zmień parametr w Power Query. Nie commituj lokalnej ścieżki; przed commitem: `python scripts/configure.py --reset`.
+   This sets the `DataRoot` Power Query parameter to the absolute path of this checkout’s `data` folder. Alternatively, change the parameter in Power Query. Do not commit your local path. Before committing, restore the portable placeholder:
 
-3. Otwórz **[model/Analytics.pbip](model/Analytics.pbip)**. Wybierz **Odśwież**, a gdy Desktop o to poprosi — zastosuj zmiany zapytań. Bez odświeżenia plik nie ma pamięci podręcznej danych.
-4. Sprawdź pełne sumy z tabelą powyżej i [control-totals.json](docs/control-totals.json). Wybierz miesiąc oraz wymiar biznesowy. Dla m/m wybierz pojedynczy miesiąc.
-5. Jeśli potrzebujesz jednego pliku, po poprawnym odświeżeniu użyj **Zapisz jako → .pbix**. W repozytorium świadomie przechowujemy edytowalne źródła PBIP/PBIR, bez binarnego cache.
+   ```powershell
+   python scripts/configure.py --reset
+   ```
 
-Oficjalna dokumentacja: [projekty Power BI](https://learn.microsoft.com/en-us/power-bi/developer/projects/projects-overview), [PBIR](https://learn.microsoft.com/en-us/power-bi/developer/projects/projects-report).
+3. Open **[model/Analytics.pbip](model/Analytics.pbip)**. Select **Refresh** and apply query changes if prompted. The repository does not include a data cache, so the first refresh is required.
+4. Reconcile full-period totals with the table above and [control-totals.json](docs/control-totals.json). Then select a month and a business dimension. Use one selected month for month-over-month cards.
+5. If you need a single binary file, use **Save as → .pbix** after a successful refresh. This repository stores editable PBIP/PBIR source files instead of a binary cache.
 
-## ✅ Jakość danych i automatyzacja
+Official documentation: [Power BI projects](https://learn.microsoft.com/en-us/power-bi/developer/projects/projects-overview), [PBIR report definitions](https://learn.microsoft.com/en-us/power-bi/developer/projects/projects-report).
+
+## ✅ Data quality and automation
 
 ```powershell
 python scripts/validate.py
 ```
 
-Kontrole obejmują unikalność kluczy, relacje, zakres dat, uzgodnienie wartości z surowymi źródłami, granice wskaźników i wynik zapytania SQL. Workflow GitHub Actions uruchamia je przy push i pull request. [Raport walidacji danych](docs/validation.json) i [walidacja schematów Microsoft](docs/schema-validation.json) opisuje wynik kontroli oraz zakres, którego nie sprawdzono w silniku Desktop.
+Checks cover key uniqueness, relationships, date coverage, reconciliation to raw sources, metric bounds and SQL output. GitHub Actions runs these checks on pushes and pull requests. The [data validation report](docs/validation.json) and [Microsoft schema validation report](docs/schema-validation.json) document the checks performed and their limits.
 
-CSV w `curated` służą do niezależnej walidacji i ćwiczenia SQL; Power BI pobiera surowe źródła i przekształca je w M. Nie trzeba ręcznie kopiować danych między raportami.
+CSV files in `data/curated` are reference outputs for independent validation and SQL practice. Power BI reads the raw sources and transforms them in Power Query, avoiding manual copying between reports.
 
-## 🗂 Struktura projektu
+To regenerate the same synthetic dataset:
 
-```text
-model/          # PBIP, natywny raport PBIR, semantyczny model TMSL
-data/raw/       # niezależne źródła operacyjne demo
-data/dimensions/# kalendarz i słowniki
-data/curated/   # wynik referencyjny do kontroli Python/SQL
-power-query/    # czytelne kopie zapytań M osadzonych w modelu
-dax/            # katalog miar osadzonych w modelu
-sql/            # analizy ad hoc
-scripts/        # konfiguracja, kontrole, generator danych
-docs/           # metodyka, słownik danych, wnioski, walidacja
-assets/         # okładka i statyczny podgląd danych
+```powershell
+python scripts/generate_data.py
+python scripts/validate.py
 ```
 
-## 📌 Założenia i ograniczenia
+## 🗂 Project structure
 
-Koszt PLN = (stawka bazowa + paliwo + opłaty) × kurs z daty wysyłki. Kursy są syntetyczne, nie NBP. Budżet elastyczny transportu = km × zatwierdzona stawka kierunku. Odchylenie dodatnie oznacza przekroczenie. Wykorzystanie = suma palet × km / suma pojemności × km. Jedna faktura kosztowa na wysyłkę; dostawy nie są liczbą wysyłek.
+```text
+model/           # PBIP, native PBIR report and TMSL semantic model
+data/raw/        # Independent synthetic operational source files
+data/dimensions/ # Calendar and dimension tables
+data/curated/    # Reference outputs for Python/SQL reconciliation
+power-query/     # Readable copies of M queries embedded in the model
+dax/             # Catalog of measures embedded in the model
+sql/             # Ad hoc business analysis
+scripts/         # Configuration, validation and data generation
+docs/            # Methodology, data dictionary, findings and checks
+assets/          # Cover and static data preview
+```
 
-Scenariusz nie uwzględnia masy, objętości ponad palety, tras powrotnych, kompatybilności ładunków, minimalnych opłat ani SLA. Model nie jest optymalizatorem tras.
+## 📌 Methodology and limitations
 
-**Status weryfikacji:** sprawdzono dane i strukturę źródeł; uruchomienie, odświeżenie M, wykonanie DAX i renderowanie natywnego raportu wymagają Power BI Desktop. Nie deklarujemy testu Desktop, którego nie przeprowadzono. [Szczegółowa metodyka](docs/methodology.md).
+**Fact-table grain:** One completed shipment per ShipmentID.
 
-Projekt przygotowany z pomocą AI; obliczenia kontrolowane niezależnie w Python/SQL. Rekomendacje dotyczą wyłącznie scenariusza demo. Licencja MIT.
+Transport cost in PLN = (base charge + fuel surcharge + tolls) × the exchange rate on the shipment date. FX rates are synthetic, not official NBP rates. The flexible transport budget is distance × the approved route rate. Positive variance means an overrun. Utilization is loaded pallet-kilometres / available pallet-kilometres. Each shipment has one cost invoice; delivery count and shipment count are different measures.
+
+The consolidation scenario excludes weight limits, non-pallet volume constraints, return legs, cargo compatibility, minimum charges and delivery service commitments. This is not a route optimizer.
+
+**Verification status:** data, source structure and report JSON schemas have been checked. Opening the project, refreshing M queries, executing DAX and rendering the native report still require validation in Power BI Desktop. No successful Desktop test is claimed. See the [detailed methodology](docs/methodology.md).
+
+Prepared with AI assistance; reference calculations are independently checked in Python and SQL. Recommendations apply only to the demonstration scenario. Licensed under the MIT License.
