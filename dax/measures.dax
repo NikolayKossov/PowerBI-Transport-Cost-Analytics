@@ -1,0 +1,75 @@
+// Koszt transportu
+Koszt transportu =
+    SUM(Transport[ActualCostPLN])
+
+// Budżet transportu
+Budżet transportu =
+    SUM(Transport[BudgetCostPLN])
+
+// Kilometry
+Kilometry =
+    SUM(Transport[DistanceKm])
+
+// Palety
+Palety =
+    SUM(Transport[Pallets])
+
+// Dostawy
+Dostawy =
+    SUM(Transport[Deliveries])
+
+// Wysyłki
+Wysyłki =
+    COUNTROWS(Transport)
+
+// Odchylenie kosztu
+Odchylenie kosztu =
+    [Koszt transportu]-[Budżet transportu]
+
+// Odchylenie %
+Odchylenie % =
+    DIVIDE([Odchylenie kosztu],[Budżet transportu])
+
+// Koszt na km
+Koszt na km =
+    DIVIDE([Koszt transportu],[Kilometry])
+
+// Koszt na paletę
+Koszt na paletę =
+    DIVIDE([Koszt transportu],[Palety])
+
+// Ważone dystansem: paletokilometry / dostępne paletokilometry.
+Wykorzystanie przestrzeni =
+    DIVIDE(SUM(Transport[LoadedPalletKm]),SUM(Transport[CapacityPalletKm]))
+
+// Terminowość
+Terminowość =
+    DIVIDE(SUM(Transport[OnTime]),[Wysyłki])
+
+// Cel wykorzystania
+Cel wykorzystania =
+    SELECTEDVALUE(Scenario[Target],0.85)
+
+// Teoretyczny górny pułap; brak ograniczeń tras, SLA, okien dostaw. Nie jest zatwierdzoną oszczędnością.
+Potencjał scenariusza =
+    SUMX(Transport, Transport[ActualCostPLN] * MAX(0, 1 - DIVIDE(DIVIDE(Transport[Pallets],Transport[CapacityPallets]),[Cel wykorzystania])))
+
+// Wartość poprzedni miesiąc
+Wartość poprzedni miesiąc =
+    CALCULATE([Koszt transportu], DATEADD('Date'[Date],-1,MONTH))
+
+// Porównanie bieżącego zbioru dat z przesuniętym o miesiąc; na karcie wybierz jeden miesiąc.
+Zmiana m/m % =
+    DIVIDE([Koszt transportu]-[Wartość poprzedni miesiąc],[Wartość poprzedni miesiąc])
+
+// Wartość poprzedni rok
+Wartość poprzedni rok =
+    CALCULATE([Koszt transportu], SAMEPERIODLASTYEAR('Date'[Date]))
+
+// Zmiana r/r %
+Zmiana r/r % =
+    DIVIDE([Koszt transportu]-[Wartość poprzedni rok],[Wartość poprzedni rok])
+
+// Wartość YTD
+Wartość YTD =
+    TOTALYTD([Koszt transportu],'Date'[Date])

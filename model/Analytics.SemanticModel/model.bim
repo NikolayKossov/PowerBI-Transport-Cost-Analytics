@@ -1,0 +1,561 @@
+{
+  "name": "Analytics",
+  "compatibilityLevel": 1600,
+  "model": {
+    "culture": "pl-PL",
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "sourceQueryCulture": "en-US",
+    "expressions": [
+      {
+        "name": "DataRoot",
+        "kind": "m",
+        "expression": "\"C:/PowerBI/data\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]"
+      },
+      {
+        "name": "stg_fx",
+        "kind": "m",
+        "expression": "let\n    Source = Csv.Document(File.Contents(DataRoot & \"/raw/fx.csv\"), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),\n    Typed = Table.TransformColumnTypes(Headers, {{\"Date\", type date}, {\"Currency\", type text}, {\"RateToPLN\", type number}}, \"en-US\")\nin\n    Typed"
+      },
+      {
+        "name": "stg_shipments",
+        "kind": "m",
+        "expression": "let\n    Source = Csv.Document(File.Contents(DataRoot & \"/raw/shipments.csv\"), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),\n    Typed = Table.TransformColumnTypes(Headers, {{\"ShipmentID\", type text}, {\"Date\", type date}, {\"RouteID\", type text}, {\"ClientID\", type text}, {\"CarrierID\", type text}, {\"Pallets\", Int64.Type}, {\"CapacityPallets\", Int64.Type}, {\"DistanceKm\", Int64.Type}, {\"Deliveries\", Int64.Type}, {\"OnTime\", Int64.Type}}, \"en-US\")\nin\n    Typed"
+      },
+      {
+        "name": "stg_invoices",
+        "kind": "m",
+        "expression": "let\n    Source = Csv.Document(File.Contents(DataRoot & \"/raw/invoices.csv\"), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),\n    Typed = Table.TransformColumnTypes(Headers, {{\"ShipmentID\", type text}, {\"Currency\", type text}, {\"Base\", type number}, {\"Fuel\", type number}, {\"Toll\", type number}}, \"en-US\")\nin\n    Typed"
+      }
+    ],
+    "tables": [
+      {
+        "name": "Date",
+        "columns": [
+          {
+            "name": "Date",
+            "dataType": "dateTime",
+            "sourceColumn": "Date",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd",
+            "isKey": true,
+            "annotations": [
+              {
+                "name": "UnderlyingDateTimeDataType",
+                "value": "Date"
+              }
+            ]
+          },
+          {
+            "name": "Year",
+            "dataType": "int64",
+            "sourceColumn": "Year",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "Month",
+            "dataType": "int64",
+            "sourceColumn": "Month",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "YearMonth",
+            "dataType": "string",
+            "sourceColumn": "YearMonth",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Quarter",
+            "dataType": "string",
+            "sourceColumn": "Quarter",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Date",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(DataRoot & \"/dimensions/Date.csv\"), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"Date\", type date}, {\"Year\", Int64.Type}, {\"Month\", Int64.Type}, {\"YearMonth\", type text}, {\"Quarter\", type text}}, \"en-US\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ],
+        "dataCategory": "Time"
+      },
+      {
+        "name": "Client",
+        "columns": [
+          {
+            "name": "ClientID",
+            "dataType": "string",
+            "sourceColumn": "ClientID",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "Client",
+            "dataType": "string",
+            "sourceColumn": "Client",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Segment",
+            "dataType": "string",
+            "sourceColumn": "Segment",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Market",
+            "dataType": "string",
+            "sourceColumn": "Market",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Client",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(DataRoot & \"/dimensions/Client.csv\"), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"ClientID\", type text}, {\"Client\", type text}, {\"Segment\", type text}, {\"Market\", type text}}, \"en-US\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Route",
+        "columns": [
+          {
+            "name": "RouteID",
+            "dataType": "string",
+            "sourceColumn": "RouteID",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "Route",
+            "dataType": "string",
+            "sourceColumn": "Route",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Market",
+            "dataType": "string",
+            "sourceColumn": "Market",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Scope",
+            "dataType": "string",
+            "sourceColumn": "Scope",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "DistanceKm",
+            "dataType": "int64",
+            "sourceColumn": "DistanceKm",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "BudgetPLNPerKm",
+            "dataType": "double",
+            "sourceColumn": "BudgetPLNPerKm",
+            "summarizeBy": "sum"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Route",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(DataRoot & \"/dimensions/Route.csv\"), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"RouteID\", type text}, {\"Route\", type text}, {\"Market\", type text}, {\"Scope\", type text}, {\"DistanceKm\", Int64.Type}, {\"BudgetPLNPerKm\", type number}}, \"en-US\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Carrier",
+        "columns": [
+          {
+            "name": "CarrierID",
+            "dataType": "string",
+            "sourceColumn": "CarrierID",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "Carrier",
+            "dataType": "string",
+            "sourceColumn": "Carrier",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Carrier",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Csv.Document(File.Contents(DataRoot & \"/dimensions/Carrier.csv\"), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+                "    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),",
+                "    Typed = Table.TransformColumnTypes(Headers, {{\"CarrierID\", type text}, {\"Carrier\", type text}}, \"en-US\")",
+                "in",
+                "    Typed"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Transport",
+        "columns": [
+          {
+            "name": "ShipmentID",
+            "dataType": "string",
+            "sourceColumn": "ShipmentID",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "Date",
+            "dataType": "dateTime",
+            "sourceColumn": "Date",
+            "summarizeBy": "none",
+            "formatString": "yyyy-MM-dd"
+          },
+          {
+            "name": "RouteID",
+            "dataType": "string",
+            "sourceColumn": "RouteID",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "ClientID",
+            "dataType": "string",
+            "sourceColumn": "ClientID",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "CarrierID",
+            "dataType": "string",
+            "sourceColumn": "CarrierID",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "Pallets",
+            "dataType": "int64",
+            "sourceColumn": "Pallets",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "CapacityPallets",
+            "dataType": "int64",
+            "sourceColumn": "CapacityPallets",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "DistanceKm",
+            "dataType": "int64",
+            "sourceColumn": "DistanceKm",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "Deliveries",
+            "dataType": "int64",
+            "sourceColumn": "Deliveries",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "OnTime",
+            "dataType": "int64",
+            "sourceColumn": "OnTime",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "ActualCostPLN",
+            "dataType": "double",
+            "sourceColumn": "ActualCostPLN",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "BudgetCostPLN",
+            "dataType": "double",
+            "sourceColumn": "BudgetCostPLN",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "LoadedPalletKm",
+            "dataType": "int64",
+            "sourceColumn": "LoadedPalletKm",
+            "summarizeBy": "sum"
+          },
+          {
+            "name": "CapacityPalletKm",
+            "dataType": "int64",
+            "sourceColumn": "CapacityPalletKm",
+            "summarizeBy": "sum"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Transport",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    A = Table.NestedJoin(stg_shipments, {\"ShipmentID\"}, stg_invoices, {\"ShipmentID\"}, \"Invoice\", JoinKind.LeftOuter),",
+                "    B = Table.ExpandTableColumn(A, \"Invoice\", {\"Currency\", \"Base\", \"Fuel\", \"Toll\"}),",
+                "    C = Table.NestedJoin(B, {\"Date\", \"Currency\"}, stg_fx, {\"Date\", \"Currency\"}, \"FX\", JoinKind.LeftOuter),",
+                "    D = Table.ExpandTableColumn(C, \"FX\", {\"RateToPLN\"}),",
+                "    E = Table.NestedJoin(D, {\"RouteID\"}, Route, {\"RouteID\"}, \"RouteBudget\", JoinKind.LeftOuter),",
+                "    F = Table.ExpandTableColumn(E, \"RouteBudget\", {\"BudgetPLNPerKm\"}),",
+                "    Checked = if Table.RowCount(F) <> Table.RowCount(stg_shipments) or List.Contains(F[RateToPLN], null) or List.Contains(F[Base], null) or List.Contains(F[BudgetPLNPerKm], null) then error \"Missing/duplicate invoice, route or FX key\" else F,",
+                "    G = Table.AddColumn(Checked, \"ActualCostPLN\", each Number.Round(([Base]+[Fuel]+[Toll])*[RateToPLN], 2), type number),",
+                "    H = Table.AddColumn(G, \"BudgetCostPLN\", each Number.Round([DistanceKm]*[BudgetPLNPerKm], 2), type number),",
+                "    I = Table.AddColumn(H, \"LoadedPalletKm\", each [Pallets]*[DistanceKm], Int64.Type),",
+                "    J = Table.AddColumn(I, \"CapacityPalletKm\", each [CapacityPallets]*[DistanceKm], Int64.Type)",
+                "in J"
+              ]
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Koszt transportu",
+            "expression": "SUM(Transport[ActualCostPLN])",
+            "formatString": "#,0.00",
+            "description": "Koszt transportu",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Budżet transportu",
+            "expression": "SUM(Transport[BudgetCostPLN])",
+            "formatString": "#,0.00",
+            "description": "Budżet transportu",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Kilometry",
+            "expression": "SUM(Transport[DistanceKm])",
+            "formatString": "#,0.00",
+            "description": "Kilometry",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Palety",
+            "expression": "SUM(Transport[Pallets])",
+            "formatString": "#,0.00",
+            "description": "Palety",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Dostawy",
+            "expression": "SUM(Transport[Deliveries])",
+            "formatString": "#,0.00",
+            "description": "Dostawy",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Wysyłki",
+            "expression": "COUNTROWS(Transport)",
+            "formatString": "#,0",
+            "description": "Wysyłki",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Odchylenie kosztu",
+            "expression": "[Koszt transportu]-[Budżet transportu]",
+            "formatString": "#,0.00",
+            "description": "Odchylenie kosztu",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Odchylenie %",
+            "expression": "DIVIDE([Odchylenie kosztu],[Budżet transportu])",
+            "formatString": "0.0%",
+            "description": "Odchylenie %",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Koszt na km",
+            "expression": "DIVIDE([Koszt transportu],[Kilometry])",
+            "formatString": "#,0.00",
+            "description": "Koszt na km",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Koszt na paletę",
+            "expression": "DIVIDE([Koszt transportu],[Palety])",
+            "formatString": "#,0.00",
+            "description": "Koszt na paletę",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Wykorzystanie przestrzeni",
+            "expression": "DIVIDE(SUM(Transport[LoadedPalletKm]),SUM(Transport[CapacityPalletKm]))",
+            "formatString": "0.0%",
+            "description": "Ważone dystansem: paletokilometry / dostępne paletokilometry.",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Terminowość",
+            "expression": "DIVIDE(SUM(Transport[OnTime]),[Wysyłki])",
+            "formatString": "0.0%",
+            "description": "Terminowość",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Cel wykorzystania",
+            "expression": "SELECTEDVALUE(Scenario[Target],0.85)",
+            "formatString": "0%",
+            "description": "Cel wykorzystania",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Potencjał scenariusza",
+            "expression": "SUMX(Transport, Transport[ActualCostPLN] * MAX(0, 1 - DIVIDE(DIVIDE(Transport[Pallets],Transport[CapacityPallets]),[Cel wykorzystania])))",
+            "formatString": "#,0.00",
+            "description": "Teoretyczny górny pułap; brak ograniczeń tras, SLA, okien dostaw. Nie jest zatwierdzoną oszczędnością.",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Wartość poprzedni miesiąc",
+            "expression": "CALCULATE([Koszt transportu], DATEADD('Date'[Date],-1,MONTH))",
+            "formatString": "#,0.00",
+            "description": "Wartość poprzedni miesiąc",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Zmiana m/m %",
+            "expression": "DIVIDE([Koszt transportu]-[Wartość poprzedni miesiąc],[Wartość poprzedni miesiąc])",
+            "formatString": "0.0%",
+            "description": "Porównanie bieżącego zbioru dat z przesuniętym o miesiąc; na karcie wybierz jeden miesiąc.",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Wartość poprzedni rok",
+            "expression": "CALCULATE([Koszt transportu], SAMEPERIODLASTYEAR('Date'[Date]))",
+            "formatString": "#,0.00",
+            "description": "Wartość poprzedni rok",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Zmiana r/r %",
+            "expression": "DIVIDE([Koszt transportu]-[Wartość poprzedni rok],[Wartość poprzedni rok])",
+            "formatString": "0.0%",
+            "description": "Zmiana r/r %",
+            "displayFolder": "KPI"
+          },
+          {
+            "name": "Wartość YTD",
+            "expression": "TOTALYTD([Koszt transportu],'Date'[Date])",
+            "formatString": "#,0.00",
+            "description": "Wartość YTD",
+            "displayFolder": "KPI"
+          }
+        ]
+      },
+      {
+        "name": "Scenario",
+        "columns": [
+          {
+            "name": "Target",
+            "dataType": "double",
+            "sourceColumn": "Target",
+            "formatString": "0%"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Scenario",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let Source = #table(type table [Target=number], {{0.75},{0.80},{0.85},{0.90},{0.95}}) in Source"
+            }
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "rel_Date",
+        "fromTable": "Transport",
+        "fromColumn": "Date",
+        "toTable": "Date",
+        "toColumn": "Date",
+        "crossFilteringBehavior": "oneDirection",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "isActive": true
+      },
+      {
+        "name": "rel_Client",
+        "fromTable": "Transport",
+        "fromColumn": "ClientID",
+        "toTable": "Client",
+        "toColumn": "ClientID",
+        "crossFilteringBehavior": "oneDirection",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "isActive": true
+      },
+      {
+        "name": "rel_Route",
+        "fromTable": "Transport",
+        "fromColumn": "RouteID",
+        "toTable": "Route",
+        "toColumn": "RouteID",
+        "crossFilteringBehavior": "oneDirection",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "isActive": true
+      },
+      {
+        "name": "rel_Carrier",
+        "fromTable": "Transport",
+        "fromColumn": "CarrierID",
+        "toTable": "Carrier",
+        "toColumn": "CarrierID",
+        "crossFilteringBehavior": "oneDirection",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "isActive": true
+      }
+    ],
+    "annotations": [
+      {
+        "name": "PBI_ProTooling",
+        "value": "[\"DevMode\"]"
+      }
+    ]
+  }
+}

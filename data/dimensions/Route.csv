@@ -1,0 +1,7 @@
+RouteID,Route,Market,Scope,DistanceKm,BudgetPLNPerKm
+R01,Łódź → Warszawa,Polska,Krajowy,140,4.8
+R02,Łódź → Poznań,Polska,Krajowy,210,4.5
+R03,Łódź → Gdańsk,Polska,Krajowy,340,4.3
+R04,Łódź → Berlin,Niemcy,Zagraniczny,480,5.2
+R05,Łódź → Praga,Czechy,Zagraniczny,450,4.9
+R06,Łódź → Lyon,Francja,Zagraniczny,1550,5.8

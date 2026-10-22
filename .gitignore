@@ -1,0 +1,7 @@
+.pbi/
+*.abf
+*.pbix
+__pycache__/
+.venv/
+*.db
+.DS_Store

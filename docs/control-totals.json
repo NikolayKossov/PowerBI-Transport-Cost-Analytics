@@ -1,0 +1,18 @@
+{
+  "Koszt transportu": {
+    "value": 20640654.35999995,
+    "unit": "PLN"
+  },
+  "Odchylenie budżetu": {
+    "value": 0.03224871604382962,
+    "unit": "%"
+  },
+  "Wykorzystanie": {
+    "value": 0.6371988596278176,
+    "unit": "%"
+  },
+  "Wysyłki": {
+    "value": 7200,
+    "unit": ""
+  }
+}

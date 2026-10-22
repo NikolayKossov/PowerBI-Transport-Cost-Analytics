@@ -1,0 +1,25 @@
+ClientID,Client,Segment,Market
+C001,Klient 01,Dystrybucja,Niemcy
+C002,Klient 02,OEM,Czechy
+C003,Klient 03,Przemysł,Francja
+C004,Klient 04,Dystrybucja,Polska
+C005,Klient 05,OEM,Niemcy
+C006,Klient 06,Przemysł,Czechy
+C007,Klient 07,Dystrybucja,Francja
+C008,Klient 08,OEM,Polska
+C009,Klient 09,Przemysł,Niemcy
+C010,Klient 10,Dystrybucja,Czechy
+C011,Klient 11,OEM,Francja
+C012,Klient 12,Przemysł,Polska
+C013,Klient 13,Dystrybucja,Niemcy
+C014,Klient 14,OEM,Czechy
+C015,Klient 15,Przemysł,Francja
+C016,Klient 16,Dystrybucja,Polska
+C017,Klient 17,OEM,Niemcy
+C018,Klient 18,Przemysł,Czechy
+C019,Klient 19,Dystrybucja,Francja
+C020,Klient 20,OEM,Polska
+C021,Klient 21,Przemysł,Niemcy
+C022,Klient 22,Dystrybucja,Czechy
+C023,Klient 23,OEM,Francja
+C024,Klient 24,Przemysł,Polska

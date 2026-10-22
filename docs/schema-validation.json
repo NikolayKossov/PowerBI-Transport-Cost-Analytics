@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "files_validated": 39,
+  "source": "Official Microsoft JSON schemas referenced by each file",
+  "method": "jsonschema Draft7Validator with remote schema resolution",
+  "native_desktop_tested": false,
+  "note": "Microsoft visualConfiguration embedded schema $id alias normalized to published schema-embedded.json URL."
+}

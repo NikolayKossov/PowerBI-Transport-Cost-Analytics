@@ -1,0 +1,15 @@
+{
+  "slug": "PowerBI-Transport-Cost-Analytics",
+  "title": "Transport Cost Analytics",
+  "pl": "Koszty transportu i wykorzystanie floty",
+  "accent": "#16B8A6",
+  "tag": "LOGISTICS INTELLIGENCE",
+  "fact": "Transport",
+  "grain": "Jedna zrealizowana wysyłka (ShipmentID).",
+  "question": "Które kierunki generują przekroczenia kosztów i gdzie warto zbadać konsolidację dostaw?",
+  "pages": [
+    "01 | Przegląd kosztów",
+    "02 | Kierunki i klienci",
+    "03 | Wykorzystanie i scenariusz"
+  ]
+}
